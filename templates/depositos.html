@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Depósitos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script>
+        var montoSeleccionado = 0; // Variable para almacenar el monto elegido
+
+        // Función para rellenar la caja de texto con el monto seleccionado
+        function setMonto(monto) {
+            document.getElementById("monto").value = monto;
+            montoSeleccionado = monto; // Guardar el monto seleccionado
+        }
+
+        // Función para limpiar el formulario de Pago via Banco
+        function limpiarPagoBanco() {
+            document.getElementById("monto").value = ""; // Limpiar el monto
+            document.getElementById("formPagoBanco").style.display = 'none'; // Ocultar el formulario
+        }
+
+        // Función para mostrar solo el formulario de Pago via Banco
+        function mostrarPagoBanco() {
+            if (document.getElementById("formBancoDetalles").style.display !== 'none') {
+                // Si estamos en el paso de detalles del banco, preguntamos si quiere iniciar una nueva transacción
+                if (confirm("¿Quieres iniciar una nueva transacción?")) {
+                    // Si elige sí, limpiamos los formularios y mostramos el formulario de Pago via Banco
+                    limpiarPagoBanco();
+                    document.getElementById("formPagoBanco").style.display = 'block';
+                    document.getElementById("formPagoUSDT").style.display = 'none';
+                    document.getElementById("formBancos").style.display = 'none'; // Ocultar bancos
+                    document.getElementById("formBancoDetalles").style.display = 'none'; // Ocultar detalles del banco
+                }
+                // Si elige no, permanece en el formulario de detalles del banco
+            } else {
+                // Si no estamos en los detalles del banco, simplemente mostramos el formulario de Pago via Banco
+                document.getElementById("formPagoBanco").style.display = 'block';
+                document.getElementById("formPagoUSDT").style.display = 'none';
+                document.getElementById("formBancos").style.display = 'none'; // Ocultar bancos
+                document.getElementById("formBancoDetalles").style.display = 'none'; // Ocultar detalles del banco
+            }
+        }
+
+        // Función para mostrar solo el formulario de Pago via USDT
+        function mostrarPagoUSDT() {
+            document.getElementById("formPagoBanco").style.display = 'none';
+            document.getElementById("formPagoUSDT").style.display = 'block';
+            document.getElementById("formBancos").style.display = 'none'; // Ocultar bancos
+            document.getElementById("formBancoDetalles").style.display = 'none'; // Ocultar detalles del banco
+        }
+
+        // Función para mostrar los bancos después de confirmar la recarga
+        function mostrarBancos() {
+            var monto = document.getElementById("monto").value;
+            if (monto && monto > 0) {  // Verifica si hay monto
+                // Limpiar el formulario de pago vía banco
+                limpiarPagoBanco();
+                // Mostrar el formulario de los bancos
+                document.getElementById("formBancos").style.display = 'block';
+            } else {
+                alert("Por favor, ingresa un monto válido para proceder.");
+            }
+        }
+
+       // Función para mostrar los detalles del banco seleccionado
+    function mostrarDetallesBanco(banco) {
+        if (montoSeleccionado <= 0) {
+            alert("Por favor, ingresa un monto antes de elegir el banco.");
+            return;
+        }
+
+        // Mostrar el formulario con detalles del banco
+        document.getElementById("formBancoDetalles").style.display = 'block';
+        document.getElementById("formBancos").style.display = 'none'; // Ocultar la selección de bancos
+
+        var bancoNombre = "";
+        var numeroCuenta = "";
+        var nombreTarjeta = "";
+
+        if (banco === "popular") {
+            bancoNombre = "Banco Popular";
+            numeroCuenta = "Número de cuenta bancaria: 9606368264";
+            nombreTarjeta = "Nombre del Tarjetahabiente: Emilio Delgado";
+        } else if (banco === "banreservas") {
+            bancoNombre = "Banreservas";
+            numeroCuenta = "Número de cuenta bancaria: 1208731267816";
+            nombreTarjeta = "Nombre del Tarjetahabiente: Emma Sofia";
+        } else if (banco === "bhd") {
+            bancoNombre = "BHD";
+            numeroCuenta = "Número de cuenta bancaria: 20902370432";
+            nombreTarjeta = "Nombre del Tarjetahabiente: Emilio Delgado";
+        }
+
+        // Rellenar la información de la cuenta con la nueva información
+        document.getElementById("bancoSeleccionado").innerText = bancoNombre;
+        document.getElementById("numeroCuenta").innerText = numeroCuenta;
+        document.getElementById("nombreTarjeta").innerText = nombreTarjeta;
+        document.getElementById("montoElegido").innerText = "Monto elegido: " + montoSeleccionado;
+    }
+    </script>
+</head>
+<style>
+    body {
+        background: linear-gradient(135deg, #000000 30%, #00bcd4 100%);
+        color: #ffffff;
+        height: 100vh;
+    }
+    .navbar {
+        background-color: rgba(0, 188, 212, 0.3) !important;
+        box-shadow: 0px 4px 8px rgba(0, 188, 212, 0.4);
+    }
+    .navbar-brand {
+        font-weight: bold;
+    }
+    .btn-warning {
+        background-color: #ffb300;
+        border: none;
+    }
+    .btn-danger {
+        background-color: #d32f2f;
+        border: none;
+    }
+    .btn-primary, .btn-success {
+        background-color: #00bcd4;
+        border: none;
+        transition: 0.3s;
+    }
+    .btn-primary:hover, .btn-success:hover {
+        background-color: #0097a7;
+        box-shadow: 0px 0px 10px #00e5ff;
+    }
+    .card {
+        background-color: rgba(25, 25, 25, 0.9);
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
+        padding: 20px;
+        color: white;
+    }
+    .modal-content {
+        background-color: rgba(25, 25, 25, 0.95);
+        color: white;
+    }
+
+    
+    .custom-btn {
+width: 130px;
+height: 40px;
+color: #fff;
+border-radius: 5px;
+padding: 10px 25px;
+font-family: 'Lato', sans-serif;
+font-weight: 500;
+background: transparent;
+cursor: pointer;
+transition: all 0.3s ease;
+position: relative;
+display: inline-block;
+box-shadow:inset 2px 2px 2px 0px rgba(255,255,255,.5),
+7px 7px 20px 0px rgba(0,0,0,.1),
+4px 4px 5px 0px rgba(0,0,0,.1);
+outline: none;
+}
+
+        /* 3 */
+.btn-3 {
+background: rgb(0,172,238);
+background: linear-gradient(0deg, rgba(0,172,238,1) 0%, rgba(2,126,251,1) 100%);
+width: 130px;
+height: 40px;
+line-height: 42px;
+padding: 0;
+border: none;
+
+}
+.btn-3 span {
+position: relative;
+display: block;
+width: 100%;
+height: 100%;
+}
+.btn-3:before,
+.btn-3:after {
+position: absolute;
+content: "";
+right: 0;
+top: 0;
+background: rgba(2,126,251,1);
+transition: all 0.3s ease;
+}
+.btn-3:before {
+height: 0%;
+width: 2px;
+}
+.btn-3:after {
+width: 0%;
+height: 2px;
+}
+.btn-3:hover{
+background: transparent;
+box-shadow: none;
+}
+.btn-3:hover:before {
+height: 100%;
+}
+.btn-3:hover:after {
+width: 100%;
+}
+.btn-3 span:hover{
+color: rgba(2,126,251,1);
+}
+.btn-3 span:before,
+.btn-3 span:after {
+position: absolute;
+content: "";
+left: 0;
+bottom: 0;
+background: rgba(2,126,251,1);
+transition: all 0.3s ease;
+}
+.btn-3 span:before {
+width: 2px;
+height: 0%;
+}
+.btn-3 span:after {
+width: 0%;
+height: 2px;
+}
+.btn-3 span:hover:before {
+height: 100%;
+}
+.btn-3 span:hover:after {
+width: 100%;
+}
+</style>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container-fluid d-flex justify-content-between">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-light">⬅ Volver</a>
+            <span class="navbar-brand">Depósitos y Retiros</span>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h3 class="text-center">Gestión de Depósitos y Retiros</h3>
+        <p class="text-center">Aquí podrás administrar tus depósitos y saldo.</p>
+
+        <!-- Botones para seleccionar el tipo de pago -->
+<div class="text-center mb-4">
+    <button class="btn btn-primary btn-lg btn-custom me-2" onclick="mostrarPagoBanco()">
+        Pago vía Banco
+    </button>
+    <button class="btn btn-info btn-lg btn-custom me-2" onclick="mostrarPagoUSDT()">
+        Pago vía USDT
+    </button>
+    <button class="btn btn-primary btn-lg btn-custom me-2" onclick="mostrarFormulario()">
+        Retiros a Banco
+    </button>
+    <button class="btn btn-primary btn-lg btn-custom" onclick="mostrarHistorial()">
+        Historial
+    </button>
+</div>
+
+<style>
+    .btn-custom {
+        width: 200px;  /* Aumenta el tamaño */
+        height: 80px;
+        font-size: 18px; /* Texto más grande */
+        font-weight: bold;
+        border-radius: 10px; /* Bordes cuadrados con un toque de suavidad */
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2); /* Agrega una sombra para resaltar */
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-custom:hover {
+        transform: scale(1.05); /* Efecto de agrandamiento al pasar el mouse */
+    }
+</style>
+
+
+<!-- Modal del historial -->
+<div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historialModalLabel">Historial de Retiros</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-dark table-striped">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Monto</th>
+                            <th>Banco</th>
+                            <th>Cuenta</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historialTabla">
+                        <tr><td colspan="5" class="text-center">Cargando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function mostrarHistorial() {
+    var modal = new bootstrap.Modal(document.getElementById('historialModal'));
+    modal.show();
+
+    // Limpiar tabla y mostrar "Cargando..."
+    let tabla = document.getElementById('historialTabla');
+    tabla.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
+
+    // Obtener historial de retiros
+    fetch('/get_historial_retiros')
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="5" class="text-center">No hay retiros registrados.</td></tr>';
+                return;
+            }
+
+            let rows = data.map(retiro => `
+                <tr>
+                    <td>${retiro.fecha}</td>
+                    <td>RD$ ${retiro.monto.toFixed(2)}</td>
+                    <td>${retiro.banco}</td>
+                    <td>${retiro.cuenta_bancaria}</td>
+                    <td>${retiro.estado}</td>
+                </tr>
+            `).join('');
+            
+            tabla.innerHTML = rows;
+        })
+        .catch(error => {
+            console.error('Error al obtener el historial:', error);
+            tabla.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar historial.</td></tr>';
+        });
+}
+</script>
+
+
+<!-- Modal del formulario -->
+<div class="modal fade" id="retiroModal" tabindex="-1" aria-labelledby="retiroModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="retiroModalLabel">Solicitud de Retiro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="retiroForm">
+                    <div class="mb-3">
+                        <label for="cuentaBancaria" class="form-label">No. de Cuenta Bancaria</label>
+                        <input type="text" class="form-control" id="cuentaBancaria" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="banco" class="form-label">Banco</label>
+                        <select class="form-control" id="banco" required>
+                            <option value="">Seleccione un banco</option>
+                            <option value="BHD">BHD</option>
+                            <option value="Popular">Popular</option>
+                            <option value="Banreservas">Banreservas</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="monto" class="form-label">Monto a Retirar</label>
+                        <input type="number" class="form-control" id="monto" required>
+                    </div>
+                    <div id="mensajeError" class="text-danger d-none">Saldo insuficiente.</div>
+                    <button type="submit" class="btn btn-success">Solicitar Retiro</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function mostrarFormulario() {
+        var modal = new bootstrap.Modal(document.getElementById('retiroModal'));
+        modal.show();
+    }
+
+    document.getElementById('retiroForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        let cuentaBancaria = document.getElementById('cuentaBancaria').value;
+        let banco = document.getElementById('banco').value;
+        let montoRetiro = parseFloat(document.getElementById('monto').value);
+        let mensajeError = document.getElementById('mensajeError');
+
+        // Petición AJAX para obtener el saldo antes de enviar el retiro
+        fetch('/get_saldo')
+            .then(response => response.json())
+            .then(data => {
+                let saldo = data.saldo;
+                if (montoRetiro > saldo) {
+                    mensajeError.classList.remove('d-none'); // Mostrar mensaje de error
+                } else {
+                    mensajeError.classList.add('d-none'); // Ocultar mensaje de error
+                    
+                    // Enviar datos del retiro al backend
+                    fetch('/solicitar_retiro', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            cuenta_bancaria: cuentaBancaria,
+                            banco: banco,
+                            monto: montoRetiro
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert('Error: ' + data.error);
+                        } else {
+                            alert('Retiro solicitado con éxito.');
+                            var modal = bootstrap.Modal.getInstance(document.getElementById('retiroModal'));
+                            modal.hide();
+                        }
+                    })
+                    .catch(error => console.error('Error al procesar el retiro:', error));
+                }
+            })
+            .catch(error => console.error('Error al obtener el saldo:', error));
+    });
+</script>
+
+        <!-- Formulario de Pago via Banco -->
+        <div id="formPagoBanco" style="display:none;">
+            <div class="card card-body">
+                <h5 class="text-center">Monto del Depósito</h5>
+                <input type="number" class="form-control mb-3" id="monto" placeholder="Ingrese el monto" required>
+                <!-- Botones rápidos para monto -->
+                <div class="d-flex justify-content-around mb-3">
+                    <button class="btn btn-outline-primary" onclick="setMonto(1000)">1000</button>
+                    <button class="btn btn-outline-primary" onclick="setMonto(3000)">3000</button>
+                    <button class="btn btn-outline-primary" onclick="setMonto(5000)">5000</button>
+                    <button class="btn btn-outline-primary" onclick="setMonto(10000)">10000</button>
+                </div>
+                <div class="d-flex justify-content-around mb-3">
+                    <button class="btn btn-outline-primary" onclick="setMonto(30000)">30000</button>
+                    <button class="btn btn-outline-primary" onclick="setMonto(50000)">50000</button>
+                    <button class="btn btn-outline-primary" onclick="setMonto(100000)">100000</button>
+                    <button class="btn btn-outline-primary" onclick="setMonto(300000)">300000</button>
+                </div>
+                <div class="d-flex justify-content-around mb-3">
+                    <button class="btn btn-outline-primary" onclick="setMonto(500000)">500000</button>
+                </div>
+                <!-- Botón Confirmar Recarga -->
+                <div class="text-center mt-3">
+                    <button class="btn btn-success" onclick="mostrarBancos()">Confirmar Recarga</button>
+                </div>
+            </div>
+        </div>
+
+<!-- Formulario de Pago vía USDT -->
+<div id="formPagoUSDT" style="display:none;">
+    <div class="card card-body">
+        <h5 class="text-center">Pago vía USDT</h5>
+
+        <form action="{{ url_for('subir_comprobante_usdt') }}" method="POST" enctype="multipart/form-data">
+            <!-- Red de transferencia -->
+            <div class="mb-3">
+                <label class="form-label"><strong>Red de transferencia:</strong></label>
+                <p class="form-control bg-light">TRC20</p>
+            </div>
+
+            <!-- Código QR -->
+            <div class="text-center mb-3">
+                <img src="{{ url_for('static', filename='qr.jpg') }}" alt="Código QR USDT" class="img-fluid" style="max-width: 200px;">
+                <p class="text-muted mt-2">Escanea el QR para enviar USDT.</p>
+            </div>
+
+            <!-- Dirección de recepción -->
+            <div class="mb-3">
+                <label class="form-label"><strong>Dirección de recepción:</strong></label>
+                <input type="text" class="form-control" value="TRON1234XYZ98765" readonly>
+            </div>
+
+            <!-- Monto del depósito -->
+            <div class="mb-3">
+                <label for="montoUSDT" class="form-label"><strong>Monto del Depósito (USDT):</strong></label>
+                <input type="number" class="form-control" id="montoUSDT" name="montoUSDT" placeholder="Ingrese el monto" required>
+            </div>
+
+            <!-- Usuario que realiza el pago -->
+            <div class="mb-3">
+                <label for="usuarioPagadorUSDT" class="form-label"><strong>Usuario del Pagador:</strong></label>
+                <input type="text" class="form-control" id="usuarioPagadorUSDT" name="usuarioPagadorUSDT" required>
+            </div>
+
+            <!-- Subir comprobante -->
+            <div class="mb-3">
+                <label for="comprobanteUSDT" class="form-label"><strong>Comprobante de Pago:</strong></label>
+                <input type="file" class="form-control" id="comprobanteUSDT" name="comprobanteUSDT" required>
+            </div>
+
+            <!-- Botón para enviar el comprobante -->
+            <button type="submit" class="btn btn-success w-100">Subir Comprobante</button>
+        </form>
+    </div>
+</div>
+
+        <!-- Formulario de Bancos (Solo visible si se confirma recarga) -->
+        <div id="formBancos" style="display:none;">
+            <div class="card card-body">
+                <h5 class="text-center">Selecciona tu banco</h5>
+                <div class="text-center mb-3">
+                    <button class="btn btn-outline-primary w-100" onclick="mostrarDetallesBanco('popular')">Banco Popular</button>
+                    <button class="btn btn-outline-primary w-100" onclick="mostrarDetallesBanco('banreservas')">Banreservas</button>
+                    <button class="btn btn-outline-primary w-100" onclick="mostrarDetallesBanco('bhd')">BHD</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detalles del Banco Seleccionado -->
+        <div id="formBancoDetalles" style="display:none;">
+            <div class="card card-body">
+                <h5 class="text-center" id="bancoSeleccionado"></h5>
+                <p id="numeroCuenta"></p>
+                <p id="nombreTarjeta"></p>
+                <p id="montoElegido"></p>
+                <button class="btn btn-success" onclick="confirmarRecarga()">Confirmar Recarga</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="formComprobante" style="display: none;">
+        <h3>Sube tu Comprobante</h3>
+        <form action="{{ url_for('subir_comprobante') }}" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="usuarioPagador" class="form-label">Usuario del Pagador</label>
+                <input type="text" class="form-control" id="usuarioPagador" name="usuarioPagador" required>
+            </div>
+            <div class="mb-3">
+                <label for="comprobante" class="form-label">Comprobante de Pago</label>
+                <input type="file" class="form-control" id="comprobante" name="comprobante" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Subir Comprobante</button>
+        </form>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+            let alerts = document.querySelectorAll(".alert");
+            alerts.forEach(alert => {
+                let bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000); // Desaparece después de 5 segundos
+    });
+</script>
+
+    <script>
+        function confirmarRecarga() {
+            // Verificar que haya un monto válido
+            if (montoSeleccionado <= 0) {
+                alert("Por favor, ingresa un monto antes de confirmar.");
+                return;
+            }
+    
+            // Ocultar el formulario de detalles del banco y mostrar el formulario de comprobante
+            document.getElementById("formBancoDetalles").style.display = 'none';
+            document.getElementById("formComprobante").style.display = 'block';
+            
+        }
+    </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let montoSeleccionado = 0;
+
+        function ocultarTodosLosFormularios() {
+            document.getElementById("formPagoBanco").style.display = "none";
+            document.getElementById("formPagoUSDT").style.display = "none";
+            document.getElementById("formBancos").style.display = "none";
+            document.getElementById("formBancoDetalles").style.display = "none";
+            document.getElementById("formComprobante").style.display = "none";
+        }
+
+        function mostrarPagoBanco() {
+            if (document.getElementById("formBancoDetalles").style.display !== "none") {
+                if (!confirm("¿Quieres iniciar una nueva transacción?")) {
+                    return; // Si elige "No", no hacemos nada
+                }
+            }
+            ocultarTodosLosFormularios();
+            document.getElementById("formPagoBanco").style.display = "block";
+            document.getElementById("monto").value = ""; // Limpiar monto
+        }
+
+        function mostrarPagoUSDT() {
+            ocultarTodosLosFormularios();
+            document.getElementById("formPagoUSDT").style.display = "block";
+        }
+
+        function mostrarBancos() {
+            let monto = document.getElementById("monto").value;
+            if (!monto || monto <= 0) {
+                alert("Por favor, ingresa un monto válido.");
+                return;
+            }
+            montoSeleccionado = monto;
+            ocultarTodosLosFormularios();
+            document.getElementById("formBancos").style.display = "block";
+        }
+
+        function mostrarDetallesBanco(banco) {
+            if (montoSeleccionado <= 0) {
+                alert("Por favor, ingresa un monto antes de elegir el banco.");
+                return;
+            }
+
+            ocultarTodosLosFormularios();
+            document.getElementById("formBancoDetalles").style.display = "block";
+
+            let bancosInfo = {
+                "popular": { nombre: "Banco Popular", cuenta: "9606368264", titular: "Damilka Santana" },
+                "banreservas": { nombre: "Banreservas", cuenta: "1208731267816", titular: "Emma Sofia" },
+                "bhd": { nombre: "BHD", cuenta: "20902370432", titular: "Emilio Delgado" }
+            };
+
+            let bancoInfo = bancosInfo[banco];
+            document.getElementById("bancoSeleccionado").innerText = bancoInfo.nombre;
+            document.getElementById("numeroCuenta").innerText = `Número de cuenta: ${bancoInfo.cuenta}`;
+            document.getElementById("nombreTarjeta").innerText = `Titular: ${bancoInfo.titular}`;
+            document.getElementById("montoElegido").innerText = `Monto elegido: ${montoSeleccionado}`;
+        }
+
+        function confirmarRecarga() {
+            if (montoSeleccionado <= 0) {
+                alert("Por favor, ingresa un monto antes de confirmar.");
+                return;
+            }
+            ocultarTodosLosFormularios();
+            document.getElementById("formComprobante").style.display = "block";
+        }
+
+        document.querySelector(".btn.btn-primary.me-2").addEventListener("click", mostrarPagoBanco);
+        document.querySelector(".btn.btn-info").addEventListener("click", mostrarPagoUSDT);
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

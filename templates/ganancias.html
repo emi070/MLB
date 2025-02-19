@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ganancias</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  
+  <script>
+    // Función que inicia el contador de 24 horas desde el último pago
+    function startCountdown(nivel, lastUpdated) {
+      // Convertimos el timestamp (en segundos) a objeto Date
+      let lastUpdate = new Date(lastUpdated * 1000);
+      // El siguiente reinicio es 24 horas después del último pago
+      let nextReset = new Date(lastUpdate.getTime() + (24 * 60 * 60 * 1000));
+
+      function updateClock() {
+        let now = new Date();
+        let timeRemaining = nextReset - now; // Diferencia en milisegundos
+
+        // Si se ha agotado el tiempo, se muestra 0 (o se puede reiniciar el contador)
+        if (timeRemaining < 0) {
+          timeRemaining = 0;
+        }
+
+        let hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+        let minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+        document.getElementById(`countdown-${nivel}`).textContent = 
+          `Reinicia en: ${hours}h ${minutes}m ${seconds}s`;
+      }
+
+      updateClock();
+      setInterval(updateClock, 1000);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // Se asume que la variable "suscripciones" se pasa desde app.py
+      let suscripciones = [
+        {% for suscripcion in suscripciones %}
+          {
+            nivel: {{ suscripcion.nivel|tojson }},
+            ultimoPago: {% if suscripcion.ultimo_pago %}{{ suscripcion.ultimo_pago.timestamp()|tojson }}{% else %}0{% endif %},
+            gananciaDiaria: {{ suscripcion.ganancia_diaria|tojson }}
+          }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
+
+      suscripciones.forEach(suscripcion => {
+        console.log("Nivel:", suscripcion.nivel);
+        console.log("Último pago:", suscripcion.ultimoPago);
+        console.log("Ganancia diaria:", suscripcion.gananciaDiaria);
+
+        startCountdown(suscripcion.nivel, suscripcion.ultimoPago);
+      });
+    });
+
+    function cancelarSuscripcion(nivel) {
+  // Mostrar alerta de confirmación
+  if (confirm("¿Estás seguro de que deseas cancelar esta suscripción? Los fondos invertidos y las ganancias diarias acumuladas serán devueltos a tu saldo.")) {
+    // Realizar la solicitud POST al backend para cancelar la suscripción
+    fetch(`/cancelar_suscripcion/${nivel}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json', // Asegúrate de enviar el token CSRF para proteger la solicitud
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message);  // Mostrar el mensaje de éxito
+      // Actualiza el saldo en la interfaz, si es necesario
+      console.log("Nuevo saldo:", data.nuevo_saldo);
+      // Aquí puedes actualizar el saldo mostrado en el frontend si lo necesitas
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Hubo un error al cancelar la suscripción.');
+    });
+  }
+}
+
+function transferirGanancia(nivel) {
+  // Mostrar alerta de confirmación
+  if (confirm("¿Estás seguro de que deseas transferir tu ganancia diaria acumulada a tu saldo?")) {
+    // Realizar la solicitud POST al backend para transferir la ganancia
+    fetch(`/transferir_ganancia/${nivel}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',  // Asegúrate de enviar el token CSRF para proteger la solicitud
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message);  // Mostrar el mensaje de éxito
+      // Actualiza el saldo en la interfaz, si es necesario
+      console.log("Nuevo saldo:", data.nuevo_saldo);
+      // Aquí puedes actualizar el saldo mostrado en el frontend si lo necesitas
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Hubo un error al transferir la ganancia.');
+    });
+  }
+}
+
+  </script>
+</head>
+<body class="bg-dark text-light">
+  <div class="container mt-4">
+    <h2 class="text-center mb-4 text-primary">Tus Suscripciones Activas</h2>
+    <div class="row">
+      {% for suscripcion in suscripciones %}
+        <div class="col-md-4">
+          <div class="card shadow-lg p-3 mb-4 bg-secondary text-light rounded">
+            <div class="card-body text-center">
+              <h4 class="card-title text-muted">{{ suscripcion.nombre|e }}</h4>
+              <p class="card-text"><strong>Costo:</strong> RD$ {{ suscripcion.costo|e }}</p>
+              <p class="card-text"><strong>Comisión:</strong> {{ suscripcion.comision|e }}</p>
+              <p class="card-text"><strong>Ganancia:</strong> {{ suscripcion.ganancia|e }}</p>
+              <p class="card-text">
+                <strong>Ganancia diaria acumulada:</strong>
+                <span id="ganancia-{{ suscripcion.nivel }}" class="text-light">RD$ {{ suscripcion.ganancia_diaria|e }}</span>
+              </p>
+              <p class="text-muted">
+                <small>
+                  Suscrito el: 
+                  {% if suscripcion.fecha_creacion %}
+                    {{ suscripcion.fecha_creacion.strftime('%d/%m/%Y %H:%M:%S') }}
+                  {% else %}
+                    N/A
+                  {% endif %}
+                </small>
+              </p>
+              <p id="countdown-{{ suscripcion.nivel }}" class="text-muted"></p>
+
+              <!-- Botones de acciones -->
+              <div class="d-flex justify-content-center gap-2">
+                <button type="button" class="btn btn-warning" onclick="transferirGanancia({{ suscripcion.nivel }})">
+                  🔄 Transferir
+                </button>
+                <button type="button" class="btn btn-success" onclick="window.location.href='{{ url_for('depositos') }}';">
+                  💰 Retirar
+                </button>                              
+                <button type="button" class="btn btn-danger" onclick="cancelarSuscripcion({{ suscripcion.nivel }})">
+                  ❌ Cancelar
+                </button>
+              </div>              
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="col-12">
+          <p class="text-center text-muted">No tienes suscripciones activas.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+<style>
+  .card {
+    border-radius: 10px;
+    box-shadow: 4px 4px 15px rgba(0, 255, 255, 0.3); /* Sombras azul turquesa */
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+  }
+
+  .btn-danger {
+    background-color: #b30000;
+    border-color: #b30000;
+  }
+
+  .btn-info {
+    background-color: #00bcd4;
+    border-color: #00bcd4;
+  }
+
+  .btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+  }
+</style>
+</html>

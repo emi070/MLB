@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000 30%, #00bcd4 100%);
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card {
+            background-color: rgba(25, 25, 25, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-label {
+            color: #ffffff;
+        }
+        .form-control {
+            background-color: #333333;
+            color: #ffffff;
+            border: 1px solid #00bcd4;
+        }
+        .form-control:focus {
+            background-color: #444444;
+            color: #ffffff;
+            border-color: #00e5ff;
+            box-shadow: 0 0 8px #00e5ff;
+        }
+        .btn-primary {
+            background-color: #00bcd4;
+            border-color: #00bcd4;
+        }
+        .btn-primary:hover {
+            background-color: #0097a7;
+            border-color: #0097a7;
+        }
+        .text-center a {
+            color: #00e5ff;
+        }
+        .text-center a:hover {
+            color: #00bcd4;
+        }
+    </style>
+</head>
+<body>
+    <div class="card text-light">
+        <h3 class="text-center">Iniciar Sesión</h3>
+
+        <!-- Muestra mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                <label for="username" class="form-label">Nombre de usuario</label>
+                {{ form.username(class="form-control", id="username", required="required") }}
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                {{ form.password(class="form-control", id="password", required="required") }}
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                <label class="form-check-label" for="remember">Recordarme</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('register') }}">¿No tienes cuenta? Regístrate</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
