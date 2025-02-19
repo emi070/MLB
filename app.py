@@ -23,7 +23,7 @@ def get_db_connection():
     return conn
 
 # Configuración para permitir cargar archivos
-app.config['UPLOAD_FOLDER'] = 'ATB-VIP/uploads'
+app.config['UPLOAD_FOLDER'] = '/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'jpg', 'jpeg', 'png', 'gif'}
 
 # Función para verificar las extensiones de los archivos
