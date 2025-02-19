@@ -23,7 +23,8 @@ def get_db_connection():
     return conn
 
 # Configuración para permitir cargar archivos
-app.config['UPLOAD_FOLDER'] = '/uploads'
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')  # Carpeta dentro del proyecto
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['ALLOWED_EXTENSIONS'] = {'jpg', 'jpeg', 'png', 'gif'}
 
 # Función para verificar las extensiones de los archivos
